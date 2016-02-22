@@ -1,0 +1,41 @@
+#!/usr/bin/env python2
+
+import sys
+import numpy
+import datetime
+
+def usage():
+   print("Usage: print_time <gcode_file>")
+   exit(1)
+try:
+   if sys.argv[1] == None:
+      usage()
+except IndexError:
+   usage()
+
+f = open(sys.argv[1])
+content = f.readlines()
+f.close()
+
+lx = ly = float(0)
+f = 0
+o = 0
+for line in content:
+   if line.startswith('G1'):
+      x = y = 0
+      ele = line.split(' ')
+      for field in ele:
+         if field.startswith('X'):
+            x = float(field[1:])
+         if field.startswith('Y'):
+            y = float(field[1:])
+         if field.startswith('F'):
+            f = float(field[1:])
+      if x !=0 and y !=0:
+         d = numpy.sqrt(numpy.square((x-lx)) + numpy.square((y-ly)))
+         t = d / ( f / 60 )
+         o = o + t
+         lx = x
+         ly = y
+elapsed = str(datetime.timedelta(seconds=o))
+print "Print time: %s" % (elapsed)
